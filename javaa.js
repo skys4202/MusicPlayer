@@ -5,6 +5,9 @@ const previous = document.querySelector('.left');
 let currentTrackIndex = 0;
 const trackImage = document.querySelector('.image'); 
 const trackTitle = document.getElementById('trackTitle');
+const progressBar = document.querySelector('.progress');
+const currentTimeElement = document.getElementById('currentTime');
+const remainingTimeElement = document.getElementById('remainingTime');
 
 
 const musicSources = [
@@ -31,8 +34,9 @@ const trackTitles = [
 function changeTrack() {
     music.src = musicSources[currentTrackIndex];
     trackImage.src = imageSources[currentTrackIndex];
-    trackTitle.textContent = trackTitles[currentTrackIndex]; // 현재 트랙 제목 업데이트
+    trackTitle.textContent = trackTitles[currentTrackIndex]; 
     music.play();
+    updatePlayButton();
 }
 
 play.addEventListener('click', () => {
@@ -41,6 +45,7 @@ play.addEventListener('click', () => {
     } else {
         music.pause();
     }
+    updatePlayButton();
 });
 
 next.addEventListener('click', () => {
@@ -55,4 +60,38 @@ previous.addEventListener('click', () => {
         currentTrackIndex = musicSources.length - 1;
     }
     changeTrack();
+});
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
+
+function updateProgressBar() {
+    const currentTime = music.currentTime;
+    const duration = music.duration;
+    const progressPercent = (currentTime / duration) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+
+    currentTimeElement.textContent = formatTime(currentTime);
+    remainingTimeElement.textContent = duration ? formatTime(duration - currentTime) : '0:00';
+}
+
+function updatePlayButton() {
+    const playIcon = play.querySelector('.playicon');
+    if (music.paused) {
+        playIcon.classList.remove('fa-pause');
+        playIcon.classList.add('fa-play');
+    } else {
+        playIcon.classList.remove('fa-play');
+        playIcon.classList.add('fa-pause');
+    }
+}
+music.addEventListener('timeupdate', updateProgressBar);
+
+
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    changeTrack(); 
 });
